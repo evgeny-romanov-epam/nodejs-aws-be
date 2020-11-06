@@ -16,13 +16,14 @@ export const createProduct: APIGatewayProxyHandler = async (event, _context) => 
     }
 
     const {title, description, price, count} = reqData;
-
     try {
-        await transaction(async client => {
+        const productId = await transaction(async client => {
             const response = await client.query("INSERT INTO product (title, description, price) VALUES ($1, $2, $3) RETURNING id", [title, description, price]);
             const productId = response.rows[0].id;
             await client.query("INSERT INTO stock (product_id, count) VALUES ($1, $2)", [productId, count])
+            return productId;
         });
+        return {statusCode: 200, headers: corsHeaders, body: JSON.stringify({id: productId, title: title, description: description, price: price, count: count}, null, 2)}
     } catch (e) {
         console.log("Error occurred while creating product", e);
         return {

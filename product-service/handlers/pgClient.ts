@@ -34,8 +34,9 @@ export async function transaction(callback: (any) => Promise<any>) {
     try {
         await client.connect();
         await client.query('BEGIN');
-        await callback(client);
+        const result = await callback(client);
         await client.query('COMMIT');
+        return result;
     } catch (e) {
         console.log("Error occurred while making transaction", e);
         try {
