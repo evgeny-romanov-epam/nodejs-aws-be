@@ -1,13 +1,20 @@
 import {APIGatewayProxyHandler} from 'aws-lambda';
 import 'source-map-support/register';
-import {getProducts} from "../src/products";
-
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*', // Required for CORS support to work
-    'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
-};
+import {query} from "./pgClient";
+import {corsHeaders} from "./cors";
 
 export const getProductsList: APIGatewayProxyHandler = async () => {
-    const products = await getProducts();
-    return {statusCode: 200, headers: corsHeaders, body: JSON.stringify(products, null, 2)}
+    console.log(`getProductsList`);
+
+    try {
+        const {rows: products} = await query("SELECT p.id, p.title, p.description, p.price, s.count " +
+            "FROM product p INNER JOIN stock s ON p.id = s.product_id");
+        return {statusCode: 200, headers: corsHeaders, body: JSON.stringify(products, null, 2)}
+    } catch (e) {
+        console.log("Error occurred while getting a list of channels", e);
+        return {
+            statusCode: 500, headers: corsHeaders,
+            body: JSON.stringify({error: "Error occurred while getting a list of channels"}, null, 2)
+        }
+    }
 }
