@@ -1,7 +1,7 @@
 import {APIGatewayProxyHandler} from 'aws-lambda';
 import 'source-map-support/register';
-import {query} from "./pgClient";
-import {corsHeaders} from "./cors";
+import {query} from "../../commons/src/pgClient";
+import {corsHeaders} from "../../commons/src/cors";
 
 export const getProductsById: APIGatewayProxyHandler = async (event, _context) => {
     const productId = event.pathParameters && event.pathParameters['productId'] ? event.pathParameters['productId']
