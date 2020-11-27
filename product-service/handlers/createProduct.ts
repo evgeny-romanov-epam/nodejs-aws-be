@@ -1,7 +1,7 @@
 import {APIGatewayProxyHandler} from 'aws-lambda';
 import 'source-map-support/register';
-import {transaction} from "./pgClient";
-import {corsHeaders} from "./cors";
+import {transaction} from "../../commons/src/pgClient";
+import {corsHeaders} from "../../commons/src/cors";
 
 export const createProduct: APIGatewayProxyHandler = async (event, _context) => {
     if (!event.body) {

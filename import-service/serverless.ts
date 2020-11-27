@@ -26,6 +26,13 @@ const serverlessConfiguration: Serverless = {
         },
         environment: {
             AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+            S3_BUCKET: 'evgeny-romanov-rs-csv',
+            SQS_URL: {
+                Ref: 'catalogItemsQueue'
+            },
+            SNS_URL: {
+                Ref: 'createProductTopic'
+            }
         },
         iamRoleStatements: [
             {
@@ -37,8 +44,48 @@ const serverlessConfiguration: Serverless = {
                 Effect: 'Allow',
                 Action: 's3:*',
                 Resource: 'arn:aws:s3:::evgeny-romanov-rs-csv/*'
+            },
+            {
+                Effect: 'Allow',
+                Action: 'sqs:*',
+                Resource: {
+                    'Fn::GetAtt': ['catalogItemsQueue', 'Arn']
+                }
+            },
+            {
+                Effect: 'Allow',
+                Action: 'sns:*',
+                Resource: {
+                    Ref: 'createProductTopic'
+                }
             }
         ]
+    },
+    resources: {
+        Resources: {
+            catalogItemsQueue: {
+                Type: 'AWS::SQS::Queue',
+                Properties: {
+                    QueueName: 'rs-products-sqs'
+                }
+            },
+            createProductTopic: {
+                Type: 'AWS::SNS::Topic',
+                Properties: {
+                    TopicName: 'rs-products-sns'
+                }
+            },
+            createProductTopicSubscription: {
+                Type: 'AWS::SNS::Subscription',
+                Properties: {
+                    Endpoint: 'evgeny_romanov_epam_rss@protonmail.com',
+                    Protocol: 'email',
+                    TopicArn: {
+                        Ref: 'createProductTopic'
+                    }
+                }
+            }
+        }
     },
     functions: {
         importProductsFile: {
@@ -72,6 +119,19 @@ const serverlessConfiguration: Serverless = {
                             suffix: '',
                         }],
                         existing: true
+                    }
+                }
+            ]
+        },
+        catalogBatchProcess: {
+            handler: 'handler.catalogBatchProcess',
+            events: [
+                {
+                    sqs: {
+                        batchSize: 5,
+                        arn: {
+                            'Fn::GetAtt': ['catalogItemsQueue', 'Arn']
+                        }
                     }
                 }
             ]
