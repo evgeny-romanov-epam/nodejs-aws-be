@@ -10,5 +10,7 @@ jspm_packages
 
 .vscode
 
+.env
+
 .idea
 *.iml

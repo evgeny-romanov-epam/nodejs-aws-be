@@ -15,7 +15,7 @@ const serverlessConfiguration: Serverless = {
         }
     },
     // Add the serverless-webpack plugin
-    plugins: ['serverless-webpack'],
+    plugins: ['serverless-webpack', 'serverless-dotenv-plugin'],
     provider: {
         name: 'aws',
         runtime: 'nodejs12.x',
@@ -102,6 +102,13 @@ const serverlessConfiguration: Serverless = {
                                     name: true
                                 }
                             }
+                        },
+                        authorizer: {
+                            name: 'importBasicAuthorizer',
+                            arn: '${cf:authorization-service-${self:provider.stage}.BasicAuthorizerLambdaFunctionQualifiedArn}',
+                            resultTtlInSeconds: 0,
+                            identitySource: 'method.request.header.Authorization',
+                            type: 'request'
                         }
                     }
                 }
