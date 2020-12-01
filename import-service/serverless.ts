@@ -84,6 +84,19 @@ const serverlessConfiguration: Serverless = {
                         Ref: 'createProductTopic'
                     }
                 }
+            },
+            GatewayResponseDefault4XX: {
+                Type: 'AWS::ApiGateway::GatewayResponse',
+                Properties: {
+                    ResponseParameters: {
+                        'gatewayresponse.header.Access-Control-Allow-Origin': "'*'",
+                        'gatewayresponse.header.Access-Control-Allow-Credentials': "'true'"
+                    },
+                    ResponseType: "DEFAULT_4XX",
+                    RestApiId: {
+                        Ref: 'ApiGatewayRestApi'
+                    }
+                }
             }
         }
     },
@@ -147,3 +160,5 @@ const serverlessConfiguration: Serverless = {
 }
 
 module.exports = serverlessConfiguration;
+
+
