@@ -15,7 +15,7 @@ const serverlessConfiguration: Serverless = {
         }
     },
     // Add the serverless-webpack plugin
-    plugins: ['serverless-webpack'],
+    plugins: ['serverless-webpack', 'serverless-dotenv-plugin'],
     provider: {
         name: 'aws',
         runtime: 'nodejs12.x',
@@ -84,6 +84,19 @@ const serverlessConfiguration: Serverless = {
                         Ref: 'createProductTopic'
                     }
                 }
+            },
+            GatewayResponseDefault4XX: {
+                Type: 'AWS::ApiGateway::GatewayResponse',
+                Properties: {
+                    ResponseParameters: {
+                        'gatewayresponse.header.Access-Control-Allow-Origin': "'*'",
+                        'gatewayresponse.header.Access-Control-Allow-Credentials': "'true'"
+                    },
+                    ResponseType: "DEFAULT_4XX",
+                    RestApiId: {
+                        Ref: 'ApiGatewayRestApi'
+                    }
+                }
             }
         }
     },
@@ -102,6 +115,13 @@ const serverlessConfiguration: Serverless = {
                                     name: true
                                 }
                             }
+                        },
+                        authorizer: {
+                            name: 'importBasicAuthorizer',
+                            arn: '${cf:authorization-service-${self:provider.stage}.BasicAuthorizerLambdaFunctionQualifiedArn}',
+                            resultTtlInSeconds: 0,
+                            identitySource: 'method.request.header.Authorization',
+                            type: 'request'
                         }
                     }
                 }
@@ -140,3 +160,5 @@ const serverlessConfiguration: Serverless = {
 }
 
 module.exports = serverlessConfiguration;
+
+
